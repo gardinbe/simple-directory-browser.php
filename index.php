@@ -94,7 +94,7 @@ echo '</ul>
 <html>
 	<head>
 	<link rel="icon" href="images/favicon.ico" type="image/ico">
-    <meta name="viewport" content="width=device-width">
+	<meta name="viewport" content="width=device-width">
 	<title><?php echo $HTMLtitle; ?></title>
 	<style>
 	

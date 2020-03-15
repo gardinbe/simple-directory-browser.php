@@ -14,7 +14,7 @@ error_reporting(0);
 $currentdir = $_GET['dir'] ?? '.';
 
 //Ignore any users trying to escape the current directory...
-if (strpos($currentdir, '/..') !== false) {
+if (strpos($currentdir, '..') !== false) {
 	$currentdir = substr($currentdir, 0, strpos($currentdir, '/..'));
 }
 

@@ -31,9 +31,17 @@ $sorteddata = array();
 //Display a list with every item in the given directory
 foreach ($currentdir_array as $i) {
 
-	//Ignore case of index.php in main directory
-	if ($i == 'index.php' && $currentdir == '.')
-		continue;
+    if ($i == 'index.php') {
+        //Ignore case of index.php in main directory
+        if ($currentdir == '.') {
+            continue;
+        //Redirect to index.php if not in main directory
+        } else {
+            header("Location: ".$currentdir."/index.php");
+            exit();
+        }
+    }
+        
 
 	//Display directory
 	if (is_dir($currentdir.'/'.$i)) {
@@ -53,18 +61,18 @@ if (strpos($currentdir, '.') === false) {
 
 	//If the user has reached the top of the file hierachy
 } elseif ($currentdir == '.') {
-	$prevdir = '<li class="choosedirItem"></span><b>[Choose a directory]</b></span></li>';
+	$prevdir = '<a><li class="choosedirItem"><b>[Choose a directory]</b></li></a>';
 	array_unshift($sorteddata, $prevdir);
 
 	//Re-add the 'previous directory' item to the top of the sorted array
 } else {
 	$dir = dirname($currentdir, 1);
-	$prevdir = '<a href="./index.php?dir='.$dir.'"><li class="prevdirItem"><b>â†‘ Up one level</b></li></a>';
+	$prevdir = '<a href="./index.php?dir='.$dir.'"><li class="prevdirItem"><b>Up one level</b></li></a>';
 	array_unshift($sorteddata, $prevdir);
 }
 
 //Create page title
-$HTMLtitle = empty(substr($currentdir,1)) ? 'Index' : 'Index of'.substr($currentdir,1);
+$HTMLtitle = empty(substr($currentdir,1)) ? 'Index' : 'Index of '.substr($currentdir,1);
 
 //Echo the HTML
 echo '<div class="container">
@@ -85,19 +93,20 @@ echo '</ul>
 <!DOCTYPE html>
 <html>
 	<head>
+	<link rel="icon" href="images/favicon.ico" type="image/ico">
+    <meta name="viewport" content="width=device-width">
 	<title><?php echo $HTMLtitle; ?></title>
 	<style>
 	
 	/* Reset css */
 	* {
-	   overflow: overlay;
-	   margin: 0;
-	   padding: 0;
+		overflow: overlay;
+		margin: 0;
+		padding: 0;
 	}
 	
 	/* Main container */
 	.container {
-		height: 100%;
 		padding: 0;
 		margin: 15px;
 		display: -webkit-box;
@@ -111,7 +120,6 @@ echo '</ul>
 	
 	/* Navigation items container */
 	.nav_container {
-		width: fit-content;
 	}
 	
 	/* Current dir message */
@@ -124,20 +132,23 @@ echo '</ul>
 	
 	/* List & items */
 	.items {
-		display: inline-block;
+		display: inline-flex;
+		flex-direction: column;
 		padding: 0;
-		margin: 5px;
 		list-style: none;
+		width: 500px;
 	}
 	.items li {
 		text-align: left;
-		width: 400px;
 		border: 1px solid black;
 		padding: 5px;
-		margin: 5px;
+		margin: 2px auto;
 	}
 	.items a {
 		text-decoration: none;
+		padding: 0px;
+		margin: 0px auto;
+		width: 100%;
 	}
 	.items .dirItem {
 		background-color: rgb(230, 230, 230);
@@ -147,16 +158,41 @@ echo '</ul>
 	}
 	.items .choosedirItem {
 		background-color: rgb(185, 185, 185);
-	}
-	.items .choosedirItem a {
 		color: black;
+		text-align: center;
 	}
 	.items .prevdirItem {
 		background-color: rgb(185, 185, 185);
-	}
-	.items .prevdirItem a {
 		color: blue;
+		text-align: center;
 	}
+
+    /* For screens <= 632px */
+    @media screen and (max-width:632px) {
+        .container {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            font-size: 20px;
+        }
+        .nav_container {
+            width: 100%;
+            margin: 5px 15px;
+        }
+        .items {
+    		width: 100%;
+    	}
+        .items a li {
+            text-align: left;
+            padding: 15px 10px;
+        }
+        .items .choosedirItem {
+            padding: 5px;
+	    }
+	    .items .prevdirItem {
+            padding: 5px;
+	    }
+    }
 	
 	</style>
 	</head>

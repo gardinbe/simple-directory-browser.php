@@ -1,6 +1,6 @@
 <?php
 
-//A clean, simple index.php for projects
+//A simple index.php for projects
 
 //Created by Ben Gardiner
 //20-03-2020
@@ -11,7 +11,8 @@
 error_reporting(0);
 
 //Get requested directory
-$currentdir = $_GET['dir'] ?? '.';
+$currentdir = $_GET['dir'] ? : '.';
+$currentdir = urldecode($currentdir);
 
 //Ignore any users trying to escape the current directory...
 if (strpos($currentdir, '..') !== false) {
@@ -24,7 +25,7 @@ $currentdir_array = scandir($currentdir);
 array_shift($currentdir_array);
 array_shift($currentdir_array);
 
-$title_dir = 'Index of:<br><b>'.substr($currentdir, 1).'/</b>';
+$title_dir = '<span id="currentdir_title">Index of:</span><span id="currentdir">'.substr($currentdir, 1).'/</span>';
 
 $sorteddata = array();
 
@@ -36,22 +37,26 @@ foreach ($currentdir_array as $i) {
         if ($currentdir == '.') {
             continue;
         //Redirect to index.php if not in main directory
-        } else {
-            header("Location: ".$currentdir."/index.php");
-            exit();
+        // } else {
+            // header("Location: ".$currentdir."/index.php");
+            // exit();
         }
     }
         
 
 	//Display directory
 	if (is_dir($currentdir.'/'.$i)) {
-		$dir =  $currentdir.'/'.$i;
-		array_unshift($sorteddata, '<a href="./index.php?dir='.$dir.'"><li class="dirItem">'.$i.'</li></a>');
+		$dir =  urlencode($currentdir.'/'.$i);
+		$ext = '';
+		$diritem = '<a href="./index.php?dir='.$dir.'"><li class="dirItem"><span id="title">'.$i.'</span><span id="ext">'.$ext.'</span></li></a>';
+		array_unshift($sorteddata, $diritem);
 
 	//Display file
 	} elseif (is_file($currentdir.'/'.$i)) {
-		$filelocation = $currentdir.'/';
-		array_push($sorteddata, '<a href="'.$filelocation.$i.'"><li class="fileItem">'.$i.'</li></a>');
+		$file = $currentdir.'/'.$i;
+		$ext = strtoupper(pathinfo($i, PATHINFO_EXTENSION)).' File';
+		$fileitem = '<a href="'.$file.'"><li class="fileItem"><span id="title">'.$i.'</span><span id="ext">'.$ext.'</span></li></a>';
+		array_push($sorteddata, $fileitem);
 	}
 }
 
@@ -61,14 +66,18 @@ if (strpos($currentdir, '.') === false) {
 
 	//If the user has reached the top of the file hierachy
 } elseif ($currentdir == '.') {
-	$prevdir = '<a><li class="choosedirItem"><b>[Choose a directory]</b></li></a>';
-	array_unshift($sorteddata, $prevdir);
+	$ext = '';
+	$choosedirItem = '<a><li class="choosedirItem"><span id="title">Choose a directory or file</span><span id="ext">'.$ext.'</span></li></a>';
+	array_unshift($sorteddata, $choosedirItem);
 
-	//Re-add the 'previous directory' item to the top of the sorted array
+	//Add the root and parent directories to the top of the sorted array
 } else {
-	$dir = dirname($currentdir, 1);
-	$prevdir = '<a href="./index.php?dir='.$dir.'"><li class="prevdirItem"><b>Up one level</b></li></a>';
-	array_unshift($sorteddata, $prevdir);
+	$dir = urlencode(dirname($currentdir, 1));
+	$ext_prevdir = '';
+	$ext_homedir = '';
+    $prevdirItem = '<a href="./index.php?dir='.$dir.'"><li class="prevdirItem"><span id="title">Parent directory (Up one level)</span><span id="ext">'.$ext_prevdir.'</span></li></a>';
+    $homedirItem = '<a href="./index.php?dir=."><li class="homedirItem"><span id="title">Root directory (Home)</span><span id="ext">'.$ext_homedir.'</span></li></a>';
+    array_unshift($sorteddata, $homedirItem, $prevdirItem);
 }
 
 //Create page title
@@ -77,8 +86,9 @@ $HTMLtitle = empty(substr($currentdir,1)) ? 'Index' : 'Index of '.substr($curren
 //Echo the HTML
 echo '<div class="container">
 	  <div class="nav_container">
-	  <p>'.$title_dir.'</p>
+	  <p class="title">'.$title_dir.'</p>
 	  <ul class="items">';
+
 
 foreach ($sorteddata as $li) {
 	echo $li;
@@ -94,28 +104,34 @@ echo '</ul>
 <html>
 	<head>
 	<link rel="icon" href="images/favicon.ico" type="image/ico">
-	<meta name="viewport" content="width=device-width">
+    <meta name="viewport" content="width=device-width">
 	<title><?php echo $HTMLtitle; ?></title>
 	<style>
-	
 	/* Reset css */
 	* {
-		overflow: overlay;
-		margin: 0;
-		padding: 0;
+	   margin: 0;
+	   padding: 0;
+	   text-decoration: none;
+	   font-size: 20px;
 	}
+	
+	/* Set scrollbar style */
+	::-webkit-scrollbar {
+        height: 4px;
+    }
+    ::-webkit-scrollbar-track-piece {
+        background: #e8e8e8;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #777;
+    }
 	
 	/* Main container */
 	.container {
 		padding: 0;
-		margin: 15px;
-		display: -webkit-box;
-		display: -moz-box;
-		display: -ms-flexbox;
-		display: -webkit-flex;
-		display: flex;
-		justify-content: center;
+		margin: 15px auto;
 		font-family: Arial;
+		max-width: 700px;
 	}
 	
 	/* Navigation items container */
@@ -123,11 +139,24 @@ echo '</ul>
 	}
 	
 	/* Current dir message */
-	p {
+	.title {
+	   display: flex;
+	   flex-direction: column;
+	   text-align: center;
+	   justify-content: center;
+	   margin-bottom: 10px;
+	}
+	
+	.title #currentdir_title {
 		font-size: 24px;
-		margin: 5px;
-		padding: 5px;
 		text-align: center;
+	}
+	.title #currentdir {
+		font-size: 24px;
+		padding-bottom: 5px;
+		text-align: center;
+  overflow: overlay;
+  white-space: nowrap;
 	}
 	
 	/* List & items */
@@ -136,64 +165,86 @@ echo '</ul>
 		flex-direction: column;
 		padding: 0;
 		list-style: none;
-		width: 500px;
+		width: 700px;
 	}
 	.items li {
-		text-align: left;
-		border: 1px solid black;
+	    display: flex;
+	    flex-direction: column;
 		padding: 5px;
 		margin: 2px auto;
-	}
+  overflow: overlay;
+	}​
 	.items a {
-		text-decoration: none;
 		padding: 0px;
 		margin: 0px auto;
 		width: 100%;
 	}
-	.items .dirItem {
-		background-color: rgb(230, 230, 230);
+	
+	#title {
+        display: flex;
+        flex-direction: row;
+        margin-right: auto;
 	}
-	.items .fileItem {
-		background-color: rgb(255, 255, 255);
+	#ext {
+        display: flex;
+        flex-direction: row;
+        color: black;
+        margin-right: auto;
 	}
-	.items .choosedirItem {
-		background-color: rgb(185, 185, 185);
+
+	.dirItem {
+		background-color: rgba(0,0,0,0.22);
+	}
+	.fileItem {
+		background-color: rgba(0,0,0,0.08);
+		color: rgb(0,10,170);
+	}
+	.choosedirItem {
+		background-color: rgba(50, 120, 200, 0.6);
 		color: black;
-		text-align: center;
 	}
-	.items .prevdirItem {
-		background-color: rgb(185, 185, 185);
-		color: blue;
-		text-align: center;
+	.prevdirItem {
+		background-color: rgba(95, 185, 185, 0.6);
+		color: rgba(20,0,200,0.8);
+	}
+    .homedirItem {
+		background-color: rgba(50, 120, 200, 0.6);
+		color: rgba(20,0,200,0.8);
+	}
+    .choosedirItem #title, .prevdirItem #title, .homedirItem #title {
+        margin-left: auto;
+        margin-right: auto;
 	}
 
     /* For screens <= 632px */
-    @media screen and (max-width:632px) {
+    @media screen and (max-width:720px) {
+        * {
+            overflow: auto;
+            white-space: nowrap;
+        }
+        body {
+            margin: 10px;
+        }
         .container {
+            margin: 0;
             width: 100%;
             padding: 0;
-            margin: 0;
             font-size: 20px;
         }
         .nav_container {
             width: 100%;
-            margin: 5px 15px;
+            margin: 0;
+        }
+        .title {
+            margin-bottom: 5px;
         }
         .items {
     		width: 100%;
     	}
         .items a li {
-            text-align: left;
-            padding: 15px 10px;
+            align-content: space-between;
         }
-        .items .choosedirItem {
-            padding: 5px;
-	    }
-	    .items .prevdirItem {
-            padding: 5px;
-	    }
     }
-	
 	</style>
 	</head>
 </html>

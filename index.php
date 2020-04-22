@@ -109,7 +109,6 @@ echo '</ul>
 	<style>
 	/* Reset css */
 	* {
-	   overflow: overlay;
 	   margin: 0;
 	   padding: 0;
 	   text-decoration: none;
@@ -133,6 +132,7 @@ echo '</ul>
 		margin: 15px auto;
 		font-family: Arial;
 		max-width: 700px;
+		overflow: overlay;
 	}
 	
 	/* Navigation items container */

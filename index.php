@@ -109,6 +109,7 @@ echo '</ul>
 	<style>
 	/* Reset css */
 	* {
+	   overflow: overlay;
 	   margin: 0;
 	   padding: 0;
 	   text-decoration: none;

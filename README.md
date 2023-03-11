@@ -1,2 +1,2 @@
 # simple index.php
-An alternative file browser
+An simple file browser for php servers

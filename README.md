@@ -1,2 +1,2 @@
 # simple php directory browser
-An simple file browser for php servers
+A very simple directory browser for php servers
